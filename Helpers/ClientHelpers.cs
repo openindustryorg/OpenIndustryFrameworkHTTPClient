@@ -47,7 +47,7 @@ namespace HTTP
             return content;
         }
 
-        public static HttpContent CreateHttpContent(object content)
+        public static HttpContent CreateHttpContent<T>(T content)
         {
             HttpContent httpContent = null;
 

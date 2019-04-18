@@ -46,14 +46,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Get.cs" />
-    <Compile Include="Models\JsonDeserializeModel.cs" />
     <Compile Include="Put.cs" />
     <Compile Include="Post.cs" />
     <Compile Include="Helpers\ClientHelpers.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
