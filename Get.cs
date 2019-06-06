@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,24 +8,26 @@ namespace HTTP
 {
     public static class Get<T>
     {
-        public static async Task<T> GetStreamAsync(Uri Url, CancellationToken cancellationToken, TimeSpan httpTimeout, string httpToken)
+        public static async Task<T> GetJsonStreamAsync(Uri Url, string authorizationScheme, string authorizationToken, CancellationToken cancellationToken, TimeSpan httpTimeout)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, Url);
-            request.Headers.Add("Authorization", httpToken);
-            
-            using (var client = new HttpClient { Timeout = httpTimeout})
-         
-            using (var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
+
+            using (var client = new HttpClient { Timeout = httpTimeout })
             {
-                var stream = await response.Content.ReadAsStreamAsync();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(authorizationScheme, authorizationToken);
 
-                if (response.IsSuccessStatusCode)
+                using (var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
                 {
-                    return ClientHelpers.DeserializeJsonFromStream<T>(stream);
-                }
+                    var stream = await response.Content.ReadAsStreamAsync();
 
-                var content = await ClientHelpers.StreamToStringAsync(stream);
-                throw new Exception($"{ (int)response.StatusCode } { content}");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return ClientHelpers.DeserializeJsonFromStream<T>(stream);
+                    }
+
+                    var content = await ClientHelpers.StreamToStringAsync(stream);
+                    throw new Exception($"{ (int)response.StatusCode } { content}");
+                }
             }
         }
 

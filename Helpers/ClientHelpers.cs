@@ -1,8 +1,5 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -47,7 +44,7 @@ namespace HTTP
             return content;
         }
 
-        public static HttpContent CreateHttpContent<T>(T content)
+        public static HttpContent CreateHttpJsonContent<T>(T content)
         {
             HttpContent httpContent = null;
 

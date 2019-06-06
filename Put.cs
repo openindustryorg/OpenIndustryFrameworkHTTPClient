@@ -1,5 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -7,36 +11,39 @@ namespace HTTP
 {
     public static class Put<T>
     {
-        public static void PutStream(T content, Uri Url, string httpToken)
+        public static void PutJsonStream(T content, Uri Url, string authorizationScheme, string authorizationToken)
         {
             var client = new HttpClient();
             var request = new HttpRequestMessage(HttpMethod.Put, Url);
-            request.Headers.Add("Authorization-Token", httpToken);
+            var httpContent = ClientHelpers.CreateHttpJsonContent<T>(content);
 
-            var httpContent = ClientHelpers.CreateHttpContent<T>(content);
             request.Content = httpContent;
+
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(authorizationScheme, authorizationToken);
 
             client.SendAsync(request);
         }
 
-        public static async Task PutStreamAsync(T content, Uri Url, CancellationToken cancellationToken, string httpToken)
+        public static async Task PutStreamAsync(T content, Uri Url, string authorizationScheme, string authorizationToken, CancellationToken cancellationToken)
         {
             var request = new HttpRequestMessage(HttpMethod.Put, Url);
-            request.Headers.Add("Authorization-Token", httpToken);
 
             using (var client = new HttpClient())
-            using (var httpContent = ClientHelpers.CreateHttpContent<T>(content))
             {
-                request.Content = httpContent;
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(authorizationScheme, authorizationToken);
 
-                using (var response = await client
-                    .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
-                    .ConfigureAwait(false))
+                using (var httpContent = ClientHelpers.CreateHttpJsonContent<T>(content))
                 {
-                    response.EnsureSuccessStatusCode();
+                    request.Content = httpContent;
+
+                    using (var response = await client
+                        .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
+                        .ConfigureAwait(false))
+                    {
+                        response.EnsureSuccessStatusCode();
+                    }
                 }
             }
         }
-        
     }
 }
